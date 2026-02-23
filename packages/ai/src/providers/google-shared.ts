@@ -296,8 +296,9 @@ export function mapStopReason(reason: FinishReason): StopReason {
 		case FinishReason.NO_IMAGE:
 			return "error";
 		default: {
-			const _exhaustive: never = reason;
-			throw new Error(`Unhandled stop reason: ${_exhaustive}`);
+			// Unknown finish reason - log it but don't crash
+			console.warn(`[pi-ai] Unknown finish_reason from Google: ${reason}`);
+			return "error";
 		}
 	}
 }

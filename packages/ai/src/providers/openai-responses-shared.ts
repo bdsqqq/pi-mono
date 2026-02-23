@@ -473,8 +473,9 @@ function mapStopReason(status: OpenAI.Responses.ResponseStatus | undefined): Sto
 		case "queued":
 			return "stop";
 		default: {
-			const _exhaustive: never = status;
-			throw new Error(`Unhandled stop reason: ${_exhaustive}`);
+			// Unknown status - log it but don't crash
+			console.warn(`[pi-ai] Unknown status from OpenAI responses: ${status}`);
+			return "error";
 		}
 	}
 }

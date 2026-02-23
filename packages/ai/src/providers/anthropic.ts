@@ -845,7 +845,8 @@ function mapStopReason(reason: Anthropic.Messages.StopReason | string): StopReas
 		case "sensitive": // Content flagged by safety filters (not yet in SDK types)
 			return "error";
 		default:
-			// Handle unknown stop reasons gracefully (API may add new values)
-			throw new Error(`Unhandled stop reason: ${reason}`);
+			// Unknown stop reason - log it but don't crash
+			console.warn(`[pi-ai] Unknown stop_reason from Anthropic: ${reason}`);
+			return "error";
 	}
 }

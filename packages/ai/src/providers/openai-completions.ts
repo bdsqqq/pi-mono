@@ -310,7 +310,24 @@ export const streamOpenAICompletions: StreamFunction<"openai-completions", OpenA
 		} catch (error) {
 			for (const block of output.content) delete (block as any).index;
 			output.stopReason = options?.signal?.aborted ? "aborted" : "error";
-			output.errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+
+			// Build informative error message with context
+			const providerName = model.provider || "unknown";
+			const modelName = model.id || "unknown";
+			const baseError = error instanceof Error ? error.message : JSON.stringify(error);
+
+			// Check if this is an upstream provider error
+			const isProviderError =
+				baseError.includes("finish_reason") ||
+				baseError.includes("Unhandled stop reason") ||
+				(error as any)?.error?.code;
+
+			if (isProviderError) {
+				output.errorMessage = `Upstream provider error (${providerName}/${modelName}): ${baseError}. Try a different model or check provider status.`;
+			} else {
+				output.errorMessage = baseError;
+			}
+
 			// Some providers via OpenRouter give additional information in this field.
 			const rawMetadata = (error as any)?.error?.metadata?.raw;
 			if (rawMetadata) output.errorMessage += `\n${rawMetadata}`;
@@ -737,7 +754,9 @@ function convertTools(
 
 function mapStopReason(reason: ChatCompletionChunk.Choice["finish_reason"]): StopReason {
 	if (reason === null) return "stop";
-	switch (reason) {
+	// Some providers (e.g., OpenRouter) return non-standard finish_reasons
+	const reasonStr = reason as string;
+	switch (reasonStr) {
 		case "stop":
 			return "stop";
 		case "length":
@@ -747,9 +766,14 @@ function mapStopReason(reason: ChatCompletionChunk.Choice["finish_reason"]): Sto
 			return "toolUse";
 		case "content_filter":
 			return "error";
+		case "error":
+			// Upstream provider returned an error - this is a provider-side failure
+			// e.g., openrouter with z-ai/glm-5 model failing
+			return "error";
 		default: {
-			const _exhaustive: never = reason;
-			throw new Error(`Unhandled stop reason: ${_exhaustive}`);
+			// Unknown finish reason - log it but don't crash
+			console.warn(`[pi-ai] Unknown finish_reason from provider: ${reasonStr}`);
+			return "error";
 		}
 	}
 }
