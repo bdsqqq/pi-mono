@@ -47,14 +47,14 @@
 		"chalk": "^5.5.0",
 		"cli-highlight": "^2.1.11",
 		"diff": "^8.0.2",
-		"file-type": "^21.1.1",
+		"file-type": "^22.0.1",
 		"glob": "^13.0.1",
 		"hosted-git-info": "^9.0.2",
 		"ignore": "^7.0.5",
 		"marked": "^15.0.12",
 		"minimatch": "^10.1.1",
 		"proper-lockfile": "^4.1.2",
-		"yaml": "^2.8.2"
+		"yaml": "^2.9.0"
 	},
 	"overrides": {
 		"rimraf": "6.1.2",
@@ -73,7 +73,7 @@
 		"@types/proper-lockfile": "^4.1.4",
 		"shx": "^0.4.0",
 		"typescript": "^5.7.3",
-		"vitest": "^3.2.4"
+		"vitest": "^4.1.10"
 	},
 	"keywords": [
 		"coding-agent",
