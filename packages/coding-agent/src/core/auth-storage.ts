@@ -21,6 +21,8 @@ import lockfile from "proper-lockfile";
 import { getAgentDir } from "../config.js";
 import { resolveConfigValue } from "./resolve-config-value.js";
 
+const AUTH_FILE_WRITE_OPTIONS = { encoding: "utf-8", mode: 0o600 } as const;
+
 export type ApiKeyCredential = {
 	type: "api_key";
 	key: string;
@@ -92,7 +94,7 @@ export class AuthStorage {
 		if (!existsSync(dir)) {
 			mkdirSync(dir, { recursive: true, mode: 0o700 });
 		}
-		writeFileSync(this.authPath, JSON.stringify(this.data, null, 2), "utf-8");
+		writeFileSync(this.authPath, JSON.stringify(this.data, null, 2), AUTH_FILE_WRITE_OPTIONS);
 		chmodSync(this.authPath, 0o600);
 	}
 
@@ -191,7 +193,7 @@ export class AuthStorage {
 			if (!existsSync(dir)) {
 				mkdirSync(dir, { recursive: true, mode: 0o700 });
 			}
-			writeFileSync(this.authPath, "{}", "utf-8");
+			writeFileSync(this.authPath, "{}", AUTH_FILE_WRITE_OPTIONS);
 			chmodSync(this.authPath, 0o600);
 		}
 
