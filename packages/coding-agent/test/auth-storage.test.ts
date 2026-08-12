@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { registerOAuthProvider } from "@mariozechner/pi-ai";
@@ -29,6 +29,13 @@ describe("AuthStorage", () => {
 	function writeAuthJson(data: Record<string, unknown>) {
 		writeFileSync(authJsonPath, JSON.stringify(data));
 	}
+
+	test.skipIf(process.platform === "win32")("creates auth.json with owner-only permissions", () => {
+		authStorage = new AuthStorage(authJsonPath);
+		authStorage.set("anthropic", { type: "api_key", key: "secret" });
+
+		expect(statSync(authJsonPath).mode & 0o777).toBe(0o600);
+	});
 
 	describe("API key resolution", () => {
 		test("literal API key is returned directly", async () => {
